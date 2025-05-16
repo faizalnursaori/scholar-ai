@@ -11,7 +11,7 @@ class UserProfile(models.Model):
         ('S3', 'PhD')
     ]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
     major = models.CharField(max_length=100)
