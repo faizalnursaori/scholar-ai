@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import { Search, Clipboard, Clock } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -32,20 +33,7 @@ export default function LandingPage() {
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
               <h3 className="card-title">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
+                <Clipboard />
                 AI Document Assistant
               </h3>
               <p>
@@ -63,20 +51,7 @@ export default function LandingPage() {
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
               <h3 className="card-title">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+                <Search />
                 Semantic Search
               </h3>
               <p>
@@ -94,20 +69,7 @@ export default function LandingPage() {
           <div className="card bg-base-100 shadow-xl">
             <div className="card-body">
               <h3 className="card-title">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Clock />
                 Deadline Reminders
               </h3>
               <p>Never miss a scholarship application deadline with our email reminder system.</p>
