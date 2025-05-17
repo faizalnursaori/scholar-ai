@@ -20,7 +20,7 @@ class UserProfile(models.Model):
     gpa = models.FloatField()
     graduation_year = models.IntegerField()
     language_scores = models.JSONField(default=dict)
-    achievments = models.TextField(blank=True)
+    achievements = models.TextField(blank=True)
     research_experience = models.TextField(blank=True)
 
     def __str__(self):

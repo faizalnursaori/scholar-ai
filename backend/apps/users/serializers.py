@@ -3,8 +3,11 @@ from django.contrib.auth import authenticate
 from .models import UserProfile, User
 
 class UserProfileSerializer(serializers.ModelSerializer):
-     class Meta:
+    class Meta:
         model = UserProfile
+        fields = ['bio', 'birth_date', 'major', 'university', 'degree_level', 
+                  'gpa', 'graduation_year', 'language_scores', 'achievements', 
+                  'research_experience']
         read_only_fields = ('user',)
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_admin', 'profile']
         extra_kwargs = {'password': {'write_only': True}}
 
-def create(self, validated_data):
+    def create(self, validated_data):
         profile_data = validated_data.pop('userprofile', None)
         user = User.objects.create_user(**validated_data)
         
@@ -26,7 +29,7 @@ def create(self, validated_data):
             UserProfile.objects.create(user=user, **profile_data)
         
         return user
-
+    
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
