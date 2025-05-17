@@ -49,7 +49,7 @@ export default function Navbar() {
             </li>
           </ul>
         </div>
-        <Link to="/" className="btn btn-ghost text-xl font-bold text-primary">
+        <Link to="/" className="btn-ghost text-xl font-bold text-primary">
           ScholarAI
         </Link>
       </div>
@@ -69,11 +69,11 @@ export default function Navbar() {
           </li>
         </ul>
       </div>
-      <div className="navbar-end">
-        <Link to="/login" className="btn btn-ghost">
+      <div className="navbar-end space-x-1.5">
+        <Link to="/login" className="btn btn-ghost rounded-md">
           Login
         </Link>
-        <Link to="/register" className="btn btn-primary">
+        <Link to="/register" className="btn btn-primary rounded-md">
           Register
         </Link>
       </div>

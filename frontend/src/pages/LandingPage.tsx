@@ -16,10 +16,10 @@ export default function LandingPage() {
               generate application documents, and track deadlines, all in one place.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/scholarships" className="btn btn-primary">
+              <Link to="/scholarships" className="btn btn-primary rounded-md">
                 Find Scholarships
               </Link>
-              <Link to="/ai-assistant" className="btn btn-secondary">
+              <Link to="/ai-assistant" className="btn btn-secondary rounded-md">
                 Use AI Assistant
               </Link>
             </div>
@@ -41,7 +41,7 @@ export default function LandingPage() {
                 scholarship requirements.
               </p>
               <div className="card-actions justify-end">
-                <Link to="/ai-assistant" className="btn btn-primary btn-sm">
+                <Link to="/ai-assistant" className="btn btn-primary btn-sm rounded-md">
                   Try Now
                 </Link>
               </div>
@@ -59,7 +59,7 @@ export default function LandingPage() {
                 for.
               </p>
               <div className="card-actions justify-end">
-                <Link to="/scholarships" className="btn btn-primary btn-sm">
+                <Link to="/scholarships" className="btn btn-primary btn-sm rounded-md">
                   Search Now
                 </Link>
               </div>
@@ -74,7 +74,7 @@ export default function LandingPage() {
               </h3>
               <p>Never miss a scholarship application deadline with our email reminder system.</p>
               <div className="card-actions justify-end">
-                <Link to="/reminders" className="btn btn-primary btn-sm">
+                <Link to="/reminders" className="btn btn-primary btn-sm rounded-md">
                   Set Reminders
                 </Link>
               </div>
