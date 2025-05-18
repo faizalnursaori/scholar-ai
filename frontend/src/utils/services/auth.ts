@@ -1,11 +1,17 @@
 import axios from "axios";
-import type { LoginData, UserData, AuthResponse } from "../types";
-
-const API_URL = "http://localhost:8000/api"; // Sesuaikan dengan URL backend
+import type { LoginData, UserData, AuthResponse, RegistrationPayload } from "../types";
+import { api } from "../axios";
 
 export const login = async (data: LoginData): Promise<AuthResponse> => {
-  const response = await axios.post<AuthResponse>(`${API_URL}/users/login/`, data);
-  return response.data;
+  try {
+    const response = await api.post<AuthResponse>("/users/login/", data);
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    }
+    throw new Error("Login failed");
+  }
 };
 
 export const getCurrentUser = (): UserData | null => {
@@ -28,4 +34,8 @@ export const logout = (): void => {
 export const getAuthHeader = (): { Authorization: string } | Record<string, never> => {
   const token = localStorage.getItem("access_token");
   return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+export const registerUser = (payload: RegistrationPayload) => {
+  return api.post("/users/register/", payload);
 };

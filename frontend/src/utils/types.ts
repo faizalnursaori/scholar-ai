@@ -29,6 +29,29 @@ export interface RegistrationFormData {
   extracurricular_activities?: string;
 }
 
+export interface RegistrationPayload {
+  username: string;
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  profile: {
+    bio: string;
+    birth_date: string;
+    major: string;
+    university: string;
+    degree_level: "S1" | "S2" | "S3";
+    gpa: number;
+    graduation_year: number;
+    language_scores: {
+      english: string;
+      other: string;
+    };
+    achievements: string;
+    research_experience: string;
+  };
+}
+
 export interface LoginData {
   username: string;
   password: string;
@@ -61,6 +84,13 @@ export interface AuthResponse {
   user: UserData;
   refresh: string;
   access: string;
+}
+
+export interface AuthContextType {
+  user: UserData | null;
+  isAuthenticated: boolean;
+  setUser: (user: UserData | null) => void;
+  logout: () => void;
 }
 
 export interface ProgressIndicatorProps {

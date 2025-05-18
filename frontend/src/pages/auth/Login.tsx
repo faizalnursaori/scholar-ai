@@ -38,7 +38,7 @@ const LoginPage = () => {
         // Implement remember me logic if needed
       }
 
-      navigate("/dashboard"); // Redirect setelah login sukses
+      navigate("/dashboard");
     } catch (err) {
       setError("Invalid username or password");
       console.error("Login error:", err);
@@ -51,13 +51,11 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-8">
       <div className="card bg-base-100 w-full max-w-md">
         <div className="card-body p-6 sm:p-8">
-          {/* Header Section */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-primary">Welcome to ScholarAI</h2>
             <p className="text-base-content/70 mt-2">Log in to continue your scholarship journey</p>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="alert alert-error mb-4">
               <svg
@@ -78,7 +76,6 @@ const LoginPage = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Username Input */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Username</span>
@@ -99,7 +96,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* Password Input */}
             <div className="form-control mt-4">
               <label className="label">
                 <span className="label-text font-medium">Password</span>
@@ -120,7 +116,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
             <div className="flex justify-between items-center mt-4">
               <div className="form-control">
                 <label className="cursor-pointer label justify-start gap-2 p-0">
@@ -141,7 +136,6 @@ const LoginPage = () => {
               </Link>
             </div>
 
-            {/* Login Button */}
             <div className="form-control mt-8">
               <button
                 type="submit"
@@ -160,10 +154,8 @@ const LoginPage = () => {
             </div>
           </form>
 
-          {/* Divider */}
           <div className="divider my-6 text-base-content/50">OR</div>
 
-          {/* Social Login Buttons */}
           <div className="grid grid-cols-2 gap-4">
             <button className="btn border-1 hover:bg-base-200 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -197,7 +189,6 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {/* Registration Link */}
           <div className="text-center mt-8">
             <p className="text-base-content/80">
               Don't have an account?{" "}
@@ -207,7 +198,6 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Footer Badge */}
           <div className="text-center mt-6">
             <div className="badge badge-accent p-3 font-medium">
               <Link to={"/"}>ScholarAI</Link>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import { z } from "zod";
+import { registerUser } from "../../utils/services/auth";
 
 import type { RegistrationFormData, RegistrationStep } from "../../utils/types";
 import {
@@ -179,11 +180,7 @@ const RegisterPage = () => {
         },
       };
 
-      await axios.post("http://localhost:8000/api/users/register/", payload, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await registerUser(payload);
 
       setTimeout(() => {
         setIsSubmitting(false);
