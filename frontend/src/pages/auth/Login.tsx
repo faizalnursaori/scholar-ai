@@ -1,9 +1,51 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { login } from "../../utils/services/auth";
+import { useAuth } from "../../hooks/useAuth";
+import { storeAuthData } from "../../utils/services/auth";
 
 const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await login(formData);
+      storeAuthData(data);
+      setUser(data.user);
+
+      if (rememberMe) {
+        // Implement remember me logic if needed
+      }
+
+      navigate("/dashboard"); // Redirect setelah login sukses
+    } catch (err) {
+      setError("Invalid username or password");
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-8">
@@ -15,68 +57,108 @@ const LoginPage = () => {
             <p className="text-base-content/70 mt-2">Log in to continue your scholarship journey</p>
           </div>
 
-          {/* Email Input */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Email</span>
-            </label>
-            <div className="relative border-1 rounded-lg">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/70">
-                <Mail size={18} />
-              </div>
-              <input
-                type="email"
-                placeholder="your.email@example.com"
-                className="input input-bordered w-full pl-10"
-              />
-            </div>
-          </div>
-
-          {/* Password Input */}
-          <div className="form-control mt-4">
-            <label className="label">
-              <span className="label-text font-medium">Password</span>
-            </label>
-            <div className="relative border-1 rounded-lg">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/70">
-                <Lock size={18} />
-              </div>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="input input-bordered w-full pl-10"
-              />
-            </div>
-          </div>
-
-          {/* Remember Me & Forgot Password */}
-          <div className="flex justify-between items-center mt-4">
-            <div className="form-control">
-              <label className="cursor-pointer label justify-start gap-2 p-0">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={() => setRememberMe(!rememberMe)}
-                  className="checkbox checkbox-primary checkbox-sm"
+          {/* Error Message */}
+          {error && (
+            <div className="alert alert-error mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
-                <span className="label-text">Remember me</span>
-              </label>
+              </svg>
+              <span>{error}</span>
             </div>
-            <Link
-              to="/forgot-password"
-              className="text-sm text-primary hover:underline font-medium"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          )}
 
-          {/* Login Button */}
-          <div className="form-control mt-8">
-            <button className="btn border-2 w-full rounded-lg">
-              Login
-              <ArrowRight size={16} className="ml-1" />
-            </button>
-          </div>
+          <form onSubmit={handleSubmit}>
+            {/* Username Input */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-medium">Username</span>
+              </label>
+              <div className="relative border-1 rounded-lg">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/70">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="your.username"
+                  className="input input-bordered w-full pl-10"
+                  value={formData.username}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="form-control mt-4">
+              <label className="label">
+                <span className="label-text font-medium">Password</span>
+              </label>
+              <div className="relative border-1 rounded-lg">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-base-content/70">
+                  <Lock size={18} />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  className="input input-bordered w-full pl-10"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex justify-between items-center mt-4">
+              <div className="form-control">
+                <label className="cursor-pointer label justify-start gap-2 p-0">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={() => setRememberMe(!rememberMe)}
+                    className="checkbox checkbox-primary checkbox-sm"
+                  />
+                  <span className="label-text">Remember me</span>
+                </label>
+              </div>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Login Button */}
+            <div className="form-control mt-8">
+              <button
+                type="submit"
+                className={`btn btn-primary border-2 w-full rounded-lg ${
+                  isLoading ? "loading" : ""
+                }`}
+                disabled={isLoading}
+              >
+                {!isLoading && (
+                  <>
+                    Login
+                    <ArrowRight size={16} className="ml-1" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
 
           {/* Divider */}
           <div className="divider my-6 text-base-content/50">OR</div>

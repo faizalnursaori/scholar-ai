@@ -29,6 +29,40 @@ export interface RegistrationFormData {
   extracurricular_activities?: string;
 }
 
+export interface LoginData {
+  username: string;
+  password: string;
+}
+
+export interface UserData {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_admin: boolean;
+  profile?: ProfileData;
+}
+
+export interface ProfileData {
+  bio?: string;
+  birth_date?: string;
+  major?: string;
+  university?: string;
+  degree_level?: string;
+  gpa?: string;
+  graduation_year?: string;
+  language_scores?: string;
+  achievements?: string;
+  research_experience?: string;
+}
+
+export interface AuthResponse {
+  user: UserData;
+  refresh: string;
+  access: string;
+}
+
 export interface ProgressIndicatorProps {
   currentStep: RegistrationStep;
 }
