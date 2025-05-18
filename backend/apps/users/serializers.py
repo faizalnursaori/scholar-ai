@@ -15,20 +15,33 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True) 
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_admin', 'profile']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_admin', 'profile', 'password']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def create(self, validated_data):
         profile_data = validated_data.pop('userprofile', None)
-        user = User.objects.create_user(**validated_data)
-        
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+
         if profile_data:
             UserProfile.objects.create(user=user, **profile_data)
-        
+
         return user
+
+    profile = UserProfileSerializer(source='userprofile', required=False)
+    email = serializers.EmailField(required=True) 
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
+    
     
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
