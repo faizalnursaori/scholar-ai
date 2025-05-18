@@ -1,337 +1,256 @@
-import { Link } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Lock,
-  GraduationCap,
-  Award,
-  BookOpen,
-  School,
-  Briefcase,
-  Users,
-  Percent,
-} from "lucide-react";
 import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import axios from "axios";
+import { z } from "zod";
+
+import type { RegistrationFormData, RegistrationStep } from "../../utils/types";
+import {
+  accountInfoSchema,
+  academicInfoSchema,
+  profileInfoSchema,
+} from "../../utils/schemas/registerSchema";
+
+import ProgressIndicator from "../../components/register/ProgressIndicator";
+import ErrorAlert from "../../components/register/ErrorAlert";
+import AccountInfoStep from "../../components/register/AccountInfoStep";
+import AcademicInfoStep from "../../components/register/AcademicInfoStep";
+import ProfileInfoStep from "../../components/register/ProfileInfoStep";
+import CompletionStep from "../../components/register/CompletionStep";
+import LoginLink from "../../components/register/LoginLink";
 
 const RegisterPage = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<RegistrationStep>(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const [formData, setFormData] = useState<RegistrationFormData>({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    bio: "",
+    birth_date: "",
+    major: "",
+    university: "",
+    degree_level: "S1",
+    gpa: "",
+    graduation_year: "",
+    language_scores: {
+      english: "",
+      other: "",
+    },
+    achievements: "",
+    research_experience: "",
+  });
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    // Clear specific field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...(prev[parent as keyof RegistrationFormData] as object),
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const validateStep = (currentStep: RegistrationStep): boolean => {
+    setError("");
+    setFieldErrors({});
+
+    try {
+      if (currentStep === 1) {
+        const stepData = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        };
+        accountInfoSchema.parse(stepData);
+      }
+
+      if (currentStep === 2) {
+        const stepData = {
+          university: formData.university,
+          major: formData.major,
+          degree_level: formData.degree_level,
+          gpa: formData.gpa,
+          graduation_year: formData.graduation_year,
+        };
+        academicInfoSchema.parse(stepData);
+      }
+
+      if (currentStep === 3) {
+        const stepData = {
+          bio: formData.bio,
+          birth_date: formData.birth_date,
+          language_scores: formData.language_scores,
+          achievements: formData.achievements,
+          research_experience: formData.research_experience,
+        };
+        profileInfoSchema.parse(stepData);
+      }
+
+      return true;
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          const path = error.path.join(".");
+          errors[path] = error.message;
+        });
+        setFieldErrors(errors);
+
+        // Set general error message with the first error
+        setError(err.errors[0].message);
+      }
+      return false;
+    }
+  };
 
   const nextStep = () => {
-    setStep(step + 1);
+    if (!validateStep(step)) {
+      return;
+    }
+    setStep((prev) => (prev + 1) as RegistrationStep);
   };
 
   const prevStep = () => {
-    setStep(step - 1);
+    setStep((prev) => (prev - 1) as RegistrationStep);
+    setError("");
+    setFieldErrors({});
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    // Validate all steps before submission
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+      setError("Please fix all validation errors before submitting");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError("");
+
+      const payload = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        profile: {
+          bio: formData.bio,
+          birth_date: formData.birth_date,
+          major: formData.major,
+          university: formData.university,
+          degree_level: formData.degree_level,
+          gpa: parseFloat(formData.gpa),
+          graduation_year: parseInt(formData.graduation_year),
+          language_scores: formData.language_scores,
+          achievements: formData.achievements,
+          research_experience: formData.research_experience,
+        },
+      };
+
+      await axios.post("http://localhost:8000/api/users/register/", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setStep(4);
+      }, 1500);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.detail ||
+            "Registration failed. Please check your input and try again."
+        );
+      } else {
+        setError("An unexpected error occurred.");
+      }
+      setIsSubmitting(false);
+    }
+  };
+
+  // Function to get error for specific field
+  const getFieldError = (fieldName: string): string | undefined => {
+    return fieldErrors[fieldName];
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-8">
-      <div className="card bg-base-100 shadow-xl w-full max-w-md">
+      <div className="card bg-base-100 w-full max-w-md">
         <div className="card-body p-6 sm:p-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">
             Create Your ScholarAI Account
           </h2>
 
-          {/* Progress indicator */}
-          <div className="flex justify-center mb-6">
-            <ul className="steps steps-horizontal w-full">
-              <li className={`step ${step >= 1 ? "step-primary" : ""}`}>Account</li>
-              <li className={`step ${step >= 2 ? "step-primary" : ""}`}>Academic</li>
-              <li className={`step ${step >= 3 ? "step-primary" : ""}`}>Achievements</li>
-              <li className={`step ${step >= 4 ? "step-primary" : ""}`}>Complete</li>
-            </ul>
-          </div>
+          <ProgressIndicator currentStep={step} />
+          <ErrorAlert error={error} />
 
-          {/* Step 1: Account Information */}
           {step === 1 && (
-            <>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Full Name</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3  rounded-l-lg bg-base-300">
-                    <User size={20} />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Enter your full name"
-                    className="input input-bordered w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Mail size={18} />
-                  </span>
-                  <input
-                    type="email"
-                    placeholder="your.email@example.com"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Password</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Lock size={18} />
-                  </span>
-                  <input
-                    type="password"
-                    placeholder="Create a secure password"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Confirm Password</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Lock size={18} />
-                  </span>
-                  <input
-                    type="password"
-                    placeholder="Confirm your password"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-6">
-                <button onClick={nextStep} className="btn btn-primary w-full rounded-lg">
-                  Next Step
-                </button>
-              </div>
-            </>
+            <AccountInfoStep
+              formData={formData}
+              onChange={handleChange}
+              onNext={nextStep}
+              fieldErrors={fieldErrors}
+              getFieldError={getFieldError}
+            />
           )}
-
-          {/* Step 2: Academic Information */}
           {step === 2 && (
-            <>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Current Education Level</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <GraduationCap size={18} />
-                  </span>
-                  <select className="select select-bordered w-full rounded-l-none">
-                    <option disabled selected>
-                      Select your education level
-                    </option>
-                    <option>S1 (Bachelor's)</option>
-                    <option>S2 (Master's)</option>
-                    <option>S3 (Doctorate)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">University</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <School size={18} />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Your university name"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Major/Field of Study</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <BookOpen size={18} />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Your field of study"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">GPA</span>
-                </label>
-                <div className="relative flex border-1 rounded-lgx">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Percent size={18} />
-                  </span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="4"
-                    placeholder="Current GPA (e.g., 3.75)"
-                    className="input input-bordered w-full rounded-l-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between gap-4 mt-6">
-                <button onClick={prevStep} className="btn btn-outline flex-1">
-                  Back
-                </button>
-                <button onClick={nextStep} className="btn btn-primary flex-1">
-                  Next Step
-                </button>
-              </div>
-            </>
+            <AcademicInfoStep
+              formData={formData}
+              onChange={handleChange}
+              onNext={nextStep}
+              onPrevious={prevStep}
+              fieldErrors={fieldErrors}
+              getFieldError={getFieldError}
+            />
           )}
-
-          {/* Step 3: Achievements */}
           {step === 3 && (
-            <>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Academic Achievements</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Award size={18} />
-                  </span>
-                  <textarea
-                    className="textarea textarea-bordered w-full rounded-l-none"
-                    placeholder="List your academic achievements, honors, awards, etc."
-                    rows={3}
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Work/Research Experience</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Briefcase size={18} />
-                  </span>
-                  <textarea
-                    className="textarea textarea-bordered w-full rounded-l-none"
-                    placeholder="Describe your relevant work or research experience"
-                    rows={3}
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Extracurricular Activities</span>
-                </label>
-                <div className="relative flex border-1 rounded-lg">
-                  <span className="inline-flex items-center px-3 bg-base-300">
-                    <Users size={18} />
-                  </span>
-                  <textarea
-                    className="textarea textarea-bordered w-full rounded-l-none"
-                    placeholder="List organizations, volunteering, or activities you're involved in"
-                    rows={3}
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="flex justify-between gap-4 mt-6">
-                <button onClick={prevStep} className="btn btn-outline flex-1">
-                  Back
-                </button>
-                <button onClick={nextStep} className="btn btn-primary flex-1">
-                  Next Step
-                </button>
-              </div>
-            </>
+            <ProfileInfoStep
+              formData={formData}
+              onChange={handleChange}
+              onSubmit={handleSubmit}
+              onPrevious={prevStep}
+              isSubmitting={isSubmitting}
+              fieldErrors={fieldErrors}
+              getFieldError={getFieldError}
+            />
           )}
+          {step === 4 && <CompletionStep />}
 
-          {/* Step 4: Completion */}
-          {step === 4 && (
-            <>
-              <div className="text-center py-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 text-primary mb-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-2">Registration Complete!</h3>
-                <p className="mb-4 text-sm">
-                  Your ScholarAI account has been created successfully. We'll help you find
-                  scholarships matching your profile and assist with application documents.
-                </p>
-
-                <div className="alert alert-info mb-4 text-sm">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="stroke-current shrink-0 w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  <span>You'll receive deadline reminders 7 days before scholarship due dates</span>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <Link to="/scholarships" className="btn btn-primary">
-                    Find Scholarships
-                  </Link>
-                  <Link to="/ai-assistant" className="btn btn-secondary">
-                    Use AI Document Assistant
-                  </Link>
-                  <Link to="/login" className="btn btn-outline">
-                    Go to Login
-                  </Link>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Login link */}
-          {step !== 4 && (
-            <div className="text-center mt-4">
-              <p className="text-sm">
-                Already have an account?{" "}
-                <Link to="/login" className="text-primary hover:underline font-semibold">
-                  Login
-                </Link>
-              </p>
-            </div>
-          )}
+          <LoginLink show={step !== 4} />
         </div>
       </div>
     </div>
