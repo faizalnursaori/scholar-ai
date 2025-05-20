@@ -2,6 +2,10 @@ import axios from "axios";
 import type { LoginData, UserData, AuthResponse, RegistrationPayload } from "../types";
 import { api } from "../axios";
 
+export const notifyAuthChange = () => {
+  window.dispatchEvent(new Event("auth-change"));
+};
+
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
     const response = await api.post<AuthResponse>("/users/login/", data);
@@ -23,6 +27,8 @@ export const storeAuthData = (data: AuthResponse): void => {
   localStorage.setItem("user", JSON.stringify(data.user));
   localStorage.setItem("access_token", data.access);
   localStorage.setItem("refresh_token", data.refresh);
+
+  notifyAuthChange();
 };
 
 export const logout = async (): Promise<void> => {
@@ -43,6 +49,8 @@ export const logout = async (): Promise<void> => {
     localStorage.removeItem("user");
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+
+    notifyAuthChange();
   }
 };
 
