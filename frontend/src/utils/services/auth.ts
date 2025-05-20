@@ -25,10 +25,25 @@ export const storeAuthData = (data: AuthResponse): void => {
   localStorage.setItem("refresh_token", data.refresh);
 };
 
-export const logout = (): void => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+export const logout = async (): Promise<void> => {
+  try {
+    const refreshToken = localStorage.getItem("refresh_token");
+    const accessToken = localStorage.getItem("access_token");
+
+    if (refreshToken && accessToken) {
+      await api.post(
+        "/users/logout/",
+        { refresh: refreshToken },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+    }
+  } catch (error) {
+    console.error("Logout API call failed:", error);
+  } finally {
+    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+  }
 };
 
 export const getAuthHeader = (): { Authorization: string } | Record<string, never> => {

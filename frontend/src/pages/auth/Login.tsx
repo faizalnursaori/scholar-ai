@@ -87,7 +87,7 @@ const LoginPage = () => {
                 <input
                   type="text"
                   name="username"
-                  placeholder="your.username"
+                  placeholder="Enter your username"
                   className="input input-bordered w-full pl-10"
                   value={formData.username}
                   onChange={handleChange}

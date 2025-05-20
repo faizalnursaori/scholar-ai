@@ -1,5 +1,3 @@
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
 import { Search, Clipboard, Clock } from "lucide-react";
 import CallToActionSection from "../components/common/CallToAction";
 import FeatureCard from "../components/common/FeatureSection";
@@ -8,7 +6,6 @@ import HeroSection from "../components/common/HeroSection";
 export default function LandingPage() {
   return (
     <div className="space-y-5">
-      <Navbar />
       <HeroSection />
 
       <section>
@@ -39,7 +36,6 @@ export default function LandingPage() {
       </section>
 
       <CallToActionSection />
-      <Footer />
     </div>
   );
 }
