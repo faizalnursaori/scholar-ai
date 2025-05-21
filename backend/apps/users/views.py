@@ -2,7 +2,7 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from .models import User
+from .models import User, UserProfile
 from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -66,7 +66,8 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_object(self):
-        return self.request.user.userprofile
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
     
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
