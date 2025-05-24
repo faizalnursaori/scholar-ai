@@ -1,6 +1,9 @@
+version: "3.8"
+
 services:
   db:
     image: postgres:15
+    container_name: scholarai_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -10,6 +13,17 @@ services:
     ports:
       - "5432:5432"
     restart: always
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: chroma
+    ports:
+      - "5010:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+    volumes:
+      - ./chroma-data:/chroma/.chroma/index
+    restart: unless-stopped
 
 volumes:
   postgres_data:
